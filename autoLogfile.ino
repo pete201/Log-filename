@@ -5,15 +5,15 @@
 */
 #include <SPI.h>
 #include <SD.h>
+#include <cstring>
 
 const int chipSelect = 15;  // Chip select pin on D1 mini SD card shield
 
 File root;
 File logFile;
-char logFileDir [20] = "mpu6050log";
-char logFilename[20];
+String logFileDir = "mpu6050log";
+String logFilename;
 
-int logFilenumber;
 
 void setup() {
  // Open serial communications and wait for port to open:
@@ -32,7 +32,7 @@ void setup() {
   }
   Serial.println("initialization done.");
 
-  // first, we create a logging directory if it does not already exist:
+  // first, create a logging directory if it does not already exist:
   if (!SD.exists(logFileDir)){
     Serial.print("Creating new directory: "); Serial.println(logFileDir);
     SD.mkdir(logFileDir);
@@ -40,19 +40,9 @@ void setup() {
     Serial.print("dir "); Serial.print(logFileDir); Serial.println(" already exists");
   }
 
+  logFilename = getLogFilename(SD.open(logFileDir));
 
-  logFilenumber = getLogFilename(SD.open(logFileDir));
-  //Serial.print("retuned log filenumber integer is: ");
-  //Serial.println(logFilenumber);
-  //SD.close("mpu6050log");
-
-
-  // we now need to generate a filename from the int returned from getLogFilename
-  sprintf(logFilename, "%s/%d.log", logFileDir, logFilenumber);
-  Serial.print("and the log Filename as a string is: ");
-  Serial.println(logFilename);
-  Serial.println();
-
+  // now we have the new logFileName, create the logfile
   logFile = SD.open(logFilename, FILE_WRITE);
   if (logFile){
     Serial.print("new logfile ");
@@ -61,7 +51,7 @@ void setup() {
     logFile.close();
   }
   
-
+  // print out SD card directory to Serial
   root = SD.open("/");
   printDirectory(root, 0);
   Serial.println("done!");
@@ -100,35 +90,29 @@ void printDirectory(File dir, int numTabs) {
   }
 }
 
-int getLogFilename(File dir){
 
-  int filename = -1;
+String getLogFilename(File dir){
 
-  Serial.print("passed directory name is ");
-  Serial.println(dir);
-
+  int logFilenumber = -1;
+  String logfile;
+  
   // I DONT LIKE THE WHILE(TRUE).  REPLACE WITH while(File entry =  dir.openNextFile())
   while (true) {
     File entry =  dir.openNextFile();
     if (! entry) {
-      // no more files
-
-      // INSERT FINAL LOGFILE NAME HERE
-      // first convert char filename into an int so that we can i++
-      filename++;
-
-
-      Serial.print("New log filename is: ");
-      Serial.println(filename);
+      // no more files so inc by 1 to get next filename
+      logFilenumber++;
 
       //create the file and return it
-      return filename;
+      logFilename =  logFileDir + "/" + logFilenumber + ".log";
+
+      return logFilename;
     }    
     
-    // pass int part of filename into int filename
-    filename = atoi(entry.name());
+    // pass integer part of filename into int logFilenumber
+    logFilenumber = atoi(entry.name());
 
-    Serial.print("flename "); Serial.print(filename); Serial.println(" already exists...");
+    //Serial.print("file "); Serial.print(logFilenumber); Serial.println(" already exists...");
 
     entry.close();
   }
