@@ -64,12 +64,7 @@ void loop() {
 
 
 void printDirectory(File dir, int numTabs) {
-  while (true) {
-    File entry =  dir.openNextFile();
-    if (! entry) {
-      // no more files
-      break;
-    }
+  while (File entry =  dir.openNextFile()) {
 
     for (uint8_t i = 0; i < numTabs; i++) {
       Serial.print('\t');
@@ -88,6 +83,8 @@ void printDirectory(File dir, int numTabs) {
 
     entry.close();
   }
+  // no more files
+  return;
 }
 
 
@@ -101,7 +98,7 @@ String getLogFilename(File dir){
     // if a logfile already exists, pass integer part of filename into int logFilenumber
     logFilenumber = atoi(entry.name());
 
-    Serial.print("file "); Serial.print(logFilenumber); Serial.println(" already exists...");
+    //Serial.print("file "); Serial.print(logFilenumber); Serial.println(" already exists...");
 
     entry.close();
   }
