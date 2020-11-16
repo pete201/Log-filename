@@ -96,24 +96,21 @@ String getLogFilename(File dir){
   int logFilenumber = -1;
   String logfile;
   
-  // I DONT LIKE THE WHILE(TRUE).  REPLACE WITH while(File entry =  dir.openNextFile())
-  while (true) {
-    File entry =  dir.openNextFile();
-    if (! entry) {
-      // no more files so inc by 1 to get next filename
-      logFilenumber++;
-
-      //create the file and return it
-      logFilename =  logFileDir + "/" + logFilenumber + ".log";
-
-      return logFilename;
-    }    
+  while (File entry = dir.openNextFile()) {   
     
-    // pass integer part of filename into int logFilenumber
+    // if a logfile already exists, pass integer part of filename into int logFilenumber
     logFilenumber = atoi(entry.name());
 
-    //Serial.print("file "); Serial.print(logFilenumber); Serial.println(" already exists...");
+    Serial.print("file "); Serial.print(logFilenumber); Serial.println(" already exists...");
 
     entry.close();
   }
+
+  // no more files, so inc logFilenumber by 1 to get next filename
+  logFilenumber++;
+
+  //create the filename and return it
+  logFilename =  logFileDir + "/" + logFilenumber + ".log";
+
+  return logFilename;
 }
